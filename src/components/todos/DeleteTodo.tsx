@@ -1,14 +1,13 @@
-import { useDeleteTodoMutation } from "../../ducks/todo";
 import { ITodo } from "../../types/todo";
+import { todoStore } from "../../store/todoStore";
 
 interface IDeleteTodoProps {
     todoId: ITodo['id'];
 }
 
 export const DeleteTodo = ({ todoId }: IDeleteTodoProps) => {
-    const [deleteTodo] = useDeleteTodoMutation();
     const onDeleteTodo = async () => {
-        deleteTodo(todoId);
+        todoStore.delete(todoId);
     }
 
     return (

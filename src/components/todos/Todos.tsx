@@ -1,18 +1,20 @@
-import { useState } from "react";
-import { useGetTodosQuery } from "../../ducks/todo";
+import {useEffect, useState} from "react";
 import { ITodo } from "../../types/todo";
 import { Logout } from "../auth/Logout";
 import { CreateTodo } from "./CreateTodo";
 import { EditTodo } from "./EditTodo";
 import { Todo } from "./Todo";
+import {todoStore} from "../../store/todoStore";
+import {observer} from "mobx-react-lite";
 
-export const Todos = () => {
+export const Todos = observer(() => {
     const [create, setCreate] = useState(true);
     const [id, setId] = useState('');
-    const todoData = useGetTodosQuery();
-    const todos: ITodo[] = todoData.data?.success ?
-        todoData.data.data :
-        [];
+    const todos = todoStore.todo
+
+    useEffect(() => {
+        todoStore.get()
+    }, [])
 
     const onEditHandler = (todoId: ITodo['id']) => {
         setCreate(false);
@@ -35,4 +37,4 @@ export const Todos = () => {
             </section >
         </div >
     );
-}
+})

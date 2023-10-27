@@ -1,16 +1,16 @@
-import { useEditTodoMutation } from "../../ducks/todo";
 import { ITodo } from "../../types/todo";
 import { DeleteTodo } from "./DeleteTodo";
+import { todoStore } from "../../store/todoStore";
+import { observer } from "mobx-react-lite";
 
 interface ITodoProps {
     todo: ITodo;
     onEditHandler: (id: ITodo['id']) => void;
 }
 
-export const Todo = ({ todo, onEditHandler }: ITodoProps) => {
-    const [editTodo] = useEditTodoMutation();
+export const Todo = observer(({ todo, onEditHandler }: ITodoProps) => {
     const onChangeCheck = async () => {
-        editTodo({
+        todoStore.update({
             ...todo,
             completed: !todo.completed
         })
@@ -33,4 +33,4 @@ export const Todo = ({ todo, onEditHandler }: ITodoProps) => {
             </div>
         </div>
     );
-}
+})

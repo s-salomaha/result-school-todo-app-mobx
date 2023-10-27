@@ -1,21 +1,18 @@
 import { useState } from "react";
-import { useEditTodoMutation, useGetTodosQuery } from "../../ducks/todo";
 import { ITodo } from "../../types/todo";
+import { todoStore } from "../../store/todoStore";
+import { observer } from "mobx-react-lite";
 
 interface IEditTodoProps {
     todoId: ITodo['id'];
     successfulEdit: () => void;
 }
 
-export const EditTodo = ({ todoId, successfulEdit }: IEditTodoProps) => {
+export const EditTodo = observer(({ todoId, successfulEdit }: IEditTodoProps) => {
     const [err, setErr] = useState('');
-    const todoData = useGetTodosQuery();
-    const todos: ITodo[] = todoData.data?.success ?
-        todoData.data.data :
-        [];
+    const todos: ITodo[] = todoStore.todo;
     const currentTodo = todos.find(todo => todo.id === todoId);
     const [input, setInput] = useState(currentTodo?.title || '');
-    const [editTodo] = useEditTodoMutation();
 
     const onEditTodo: React.FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
@@ -34,7 +31,7 @@ export const EditTodo = ({ todoId, successfulEdit }: IEditTodoProps) => {
             return;
         }
 
-        await editTodo({
+        await todoStore.update({
             ...currentTodo,
             title: input
         })
@@ -57,4 +54,4 @@ export const EditTodo = ({ todoId, successfulEdit }: IEditTodoProps) => {
             </form>
         </section>
     );
-}
+})
