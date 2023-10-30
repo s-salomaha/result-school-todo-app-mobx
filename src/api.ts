@@ -11,13 +11,13 @@ class Api {
   refreshToken = localStorage.getItem('refresh') || undefined
 
   async getTodos(): Promise<Response<ITodo[]>> {
-    const response = await this.fetch('http://localhost:3142/todos')
+    const response = await this.fetchWithRefresh('http://localhost:3142/todos')
 
     return response
   }
 
   async createTodo(title: string): Promise<Response<ITodo>> {
-    const response = await this.fetch(
+    const response = await this.fetchWithRefresh(
       'http://localhost:3142/todos',
       {
         method: 'POST',
@@ -29,7 +29,7 @@ class Api {
   }
 
   async updateTodo(todo: ITodo): Promise<Response<ITodo>> {
-    const response = await this.fetch(
+    const response = await this.fetchWithRefresh(
       `http://localhost:3142/todos${todo.id}`,
       {
         method: 'PATCH',
@@ -41,7 +41,7 @@ class Api {
   }
 
   async deleteTodo(id: ITodo['id']): Promise<Response<ITodo[]>> {
-    const response = await this.fetch(
+    const response = await this.fetchWithRefresh(
       `http://localhost:3142/todos${id}`,
       {
         method: 'DELETE'
@@ -49,6 +49,17 @@ class Api {
     )
 
     return response
+  }
+
+  async fetchWithRefresh(url: string, config?: RequestInit) {
+    let result = await this.fetch(url, config)
+
+    if (result.status === 403) {
+      await this.refresh()
+      result = await this.fetch(url, config)
+    }
+
+    return result.json()
   }
 
   async fetch(url: string, config?: RequestInit) {
@@ -59,7 +70,7 @@ class Api {
         'content-type': 'application/json',
         'authorization': `Bearer ${this.accessToken}`
       }
-    }).then(res => res.json())
+    })
   }
 
   async login (body: { login: string, password: string }) {
@@ -135,6 +146,10 @@ class Api {
         body: JSON.stringify({ refresh: this.refreshToken })
       }
     ).then(res => res.json())
+
+    if (isSuccessResponse(data)) {
+      this.setTokens(data.data)
+    }
 
     return data;
   }
